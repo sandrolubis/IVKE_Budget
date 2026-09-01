@@ -23,6 +23,8 @@ https://doi.org/10.1038/s41467-024-53369-0
 
 The original VKE framework and additional physical-process decomposition are given in **Ong and Yang (2024)**, including Eq. (10).
 
+The attached code uses ERA5 as the input dataset, but it can be easily adapted for other reanalysis products or model output.
+
 ---
 
 ## VKE Definition
