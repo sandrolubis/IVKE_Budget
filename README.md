@@ -43,7 +43,7 @@ and
 \mathrm{VKE}=q^2K
 ```
 
-where $\mathbf{u}=(u,v)$ is the horizontal wind vector and $q$ is specific humidity.
+where $\textbf{u}=(u,v)$ is the horizontal wind vector and $q$ is specific humidity.
 
 The vertically integrated VKE is
 
