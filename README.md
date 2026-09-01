@@ -60,7 +60,7 @@ The default integration range is **1000–200 hPa**.
 
 ## VKE Budget
 
-The VKE budget can be written as (see **Eq. (3) of Lubis et al. (2026)**):
+The VKE budget can be written as (see Eq. (3) of Lubis et al. (2026) and Eq. (3) in Ong and Yang (2024)):
 
 ```math
 \frac{\partial(q^2K)}{\partial t}
