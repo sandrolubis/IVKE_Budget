@@ -1,8 +1,28 @@
 # Vapor Kinetic Energy (VKE) and Integrated VKE (IVKE) Budget
 
+**Sandro W. Lubis** Pacific Northwest National Laboratory (PNNL)  
+
 Python code for calculating **Vapor Kinetic Energy (VKE)**, **Integrated Vapor Kinetic Energy (IVKE)**, **Integrated Vapor Transport (IVT)**, and selected VKE/IVKE tendency terms from pressure-level atmospheric data.
 
-The implementation follows **Eq. (3) of Lubis et al. (2026)** and is based on the VKE framework of **Ong and Yang (2024)**.
+The implementation follows **Eq. (3) of Lubis et al. (2026)** and is based on the VKE framework of **Ong and Yang (2024)** (see Eqs. 3 and 10).
+
+
+## Citation
+
+If you use or adapt this code, please cite:
+
+**Lubis, S. W., L. R. Leung, and M. Battalio (2026).**  
+*More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*  
+**Geophysical Research Letters.**
+
+The VKE/IVKE budget implemented here corresponds to **Eq. (3) of Lubis et al. (2026)**.
+
+**Ong, H., and D. Yang (2024).**  
+*Vapor kinetic energy for the detection and understanding of atmospheric rivers.*  
+**Nature Communications, 15**, 9428.  
+https://doi.org/10.1038/s41467-024-53369-0
+
+The original VKE framework and additional physical-process decomposition are given in **Ong and Yang (2024)**, including Eq. (10).
 
 ---
 
@@ -134,27 +154,7 @@ Vertically integrated: IPEKE
 
 ---
 
-## Mapping to Eq. (3) of Lubis et al. (2026)
-
-| Eq. (3) RHS term | Pressure-level output | Integrated output |
-|---|---|---|
-| Horizontal VKE advection | `HAKE + HAV` | `IHAKE + IHAV` |
-| Vertical VKE advection | `VAKE + VAV` | `IVAKE + IVAV` |
-| PE → KE conversion | `PEKE` | `IPEKE` |
-
-Thus,
-
-```text
-1st RHS term = IHAKE + IHAV
-2nd RHS term = IVAKE + IVAV
-3rd RHS term = IPEKE
-```
-
-for the vertically integrated IVKE budget.
-
----
-
-## Other Terms / Residual
+### 4. Other Terms / Residual
 
 The present code does not explicitly calculate all parameterized physical-process terms.
 
@@ -219,30 +219,6 @@ OUTPUT_MODE = "both"  # both
 
 `IVT`, `IVKE`, `IHAKE`, `IHAV`, `IVAKE`, `IVAV`, `IPEKE`
 
----
 
-## Citation
 
-If you use or adapt this code, please cite:
 
-**Lubis, S. W., L. R. Leung, and M. Battalio (2026).**  
-*More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*  
-**Geophysical Research Letters.**
-
-The VKE/IVKE budget implemented here corresponds to **Eq. (3) of Lubis et al. (2026)**.
-
-**Ong, H., and D. Yang (2024).**  
-*Vapor kinetic energy for the detection and understanding of atmospheric rivers.*  
-**Nature Communications, 15**, 9428.  
-https://doi.org/10.1038/s41467-024-53369-0
-
-The original VKE framework and additional physical-process decomposition are given in **Ong and Yang (2024)**, including Eq. (10).
-
----
-
-## Author
-
-**Sandro W. Lubis**  
-Atmospheric Sciences and Global Change Division  
-Pacific Northwest National Laboratory (PNNL)  
-Richland, Washington, USA
