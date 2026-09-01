@@ -179,9 +179,9 @@ The residual may contain contributions from friction, turbulence, moist convecti
 
 If the corresponding model or reanalysis tendency variables are available, these terms can instead be calculated explicitly following **Eq. (10) of Ong and Yang (2024)**.
 
-***NOTE***
+***NOTE***:
 
-If you wish to calculate the “other” dissipation and physical tendency terms explicitly, see the example provided in the test_MERRA2 directory. This example uses MERRA-2 tendency fields to diagnose additional VKE/IVKE budget terms associated with processes such as turbulence, moist convection, gravity-wave drag, and other parameterized tendencies.
+**If you wish to calculate the “other” dissipation and physical tendency terms explicitly, see the example provided in the test_MERRA2 directory. This example uses MERRA-2 tendency fields to diagnose additional VKE/IVKE budget terms associated with processes such as turbulence, moist convection, gravity-wave drag, and other parameterized tendencies.**
 
 ---
 
