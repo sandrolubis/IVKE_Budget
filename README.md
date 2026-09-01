@@ -24,6 +24,7 @@ https://doi.org/10.1038/s41467-024-53369-0
 The original VKE framework and additional physical-process decomposition are given in **Ong and Yang (2024)**, including Eq. (10).
 
 
+Please let me know if you find any bugs or issues with the code.
 
 ---
 
@@ -224,7 +225,7 @@ OUTPUT_MODE = "both"  # both
 
 `IVT`, `IVKE`, `IHAKE`, `IHAV`, `IVAKE`, `IVAV`, `IPEKE`
 
-Please let me know if you find any bugs or issues with the code.
+
 
 
 
