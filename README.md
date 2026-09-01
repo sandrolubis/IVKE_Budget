@@ -8,7 +8,7 @@ The implementation follows **Eq. (3) of Lubis et al. (2026)** and is based on th
 
 
 ## Citation
-
+If you use or adapt this code, please cite:
 
 **Lubis, S. W., L. R. Leung, and M. Battalio (2026).**  
 *More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*  
