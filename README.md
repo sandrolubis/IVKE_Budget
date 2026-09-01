@@ -33,7 +33,7 @@ Please let me know if you find any bugs or issues with the code.
 Following Ong and Yang (2024),
 
 ```math
-K=\frac{1}{2}|\mathbf{u}|^2
+K=\frac{1}{2}|\textbf{u}|^2
 =\frac{1}{2}(u^2+v^2)
 ```
 
