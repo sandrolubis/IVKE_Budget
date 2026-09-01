@@ -28,63 +28,70 @@ The decomposition of additional physical tendency terms follows the more complet
 
 ---
 
-## VKE Definition
+1. Vapor Kinetic Energy
 
-Horizontal kinetic energy is defined as
-
-$$
-K=\frac{1}{2}(u^2+v^2),
-$$
-
-and Vapor Kinetic Energy is
+The horizontal kinetic energy per unit mass is
 
 $$
-\mathrm{VKE}=q^2K,
+K = \frac{1}{2}\left(u^2+v^2\right),
 $$
 
 where
 
-* \(q\) = specific humidity,
-* \(u\) = zonal wind,
-* \(v\) = meridional wind.
+$u$ = zonal wind,
+$v$ = meridional wind.
 
-The vertically integrated quantity is
+Vapor Kinetic Energy is defined as
 
 $$
-\mathrm{IVKE}
-=
+\mathrm{VKE} = q^2 K,
+$$
+
+where $q$ is specific humidity.
+
+The vertically integrated Vapor Kinetic Energy is
+
 \frac{1}{g}
-\int_{p_T}^{p_B}q^2K\,dp.
+\int_{p_T}^{p_B}
+q^2 K,dp,
 $$
 
-The default vertical integration range in this code is **1000–200 hPa**.
+where
 
----
+$g$ = gravitational acceleration,
+$p_B$ = lower pressure boundary,
+$p_T$ = upper pressure boundary.
 
-# VKE Budget
+The default vertical integration range in this code is 1000–200 hPa.
 
-The budget implemented here corresponds to **Eq. (3) of Lubis et al. (2026)** and the corresponding VKE formulation of Ong and Yang (2024).
+2. VKE Budget
+
+The budget implemented here corresponds to Eq. (3) of Lubis et al. (2026) and follows the VKE framework of Ong and Yang (2024).
 
 The resolved dynamical part of the VKE tendency can be written schematically as
 
-$$
-\frac{\partial (q^2K)}{\partial t}
-=
 -\mathbf{V}\cdot\nabla_p(q^2K)
 -\omega\frac{\partial(q^2K)}{\partial p}
 -q^2\mathbf{V}\cdot\nabla_p\Phi
 +\mathrm{Other},
 $$
 
-where \(\mathbf{V}=(u,v)\).
+where
 
-The first three terms on the right-hand side are explicitly calculated by this code.
+$$
+\mathbf{V}=(u,v).
+$$
 
----
+The present code explicitly calculates the first three terms on the right-hand side.
 
-## 1. Horizontal Advection of VKE
+These correspond to:
 
-The **first term on the RHS of Eq. (3) of Lubis et al. (2026)** is
+Horizontal advection of VKE
+Vertical advection of VKE
+Potential-energy-to-kinetic-energy conversion
+3. First RHS Term: Horizontal Advection of VKE
+
+The first term on the RHS of Eq. (3) of Lubis et al. (2026) is
 
 $$
 -\mathbf{V}\cdot\nabla_p(q^2K).
@@ -92,32 +99,25 @@ $$
 
 Using the product rule,
 
-$$
--\mathbf{V}\cdot\nabla_p(q^2K)
-=
 -q^2\mathbf{V}\cdot\nabla_pK
--
+
 2qK\mathbf{V}\cdot\nabla_pq.
 $$
 
-In this code, these two components are
+The code separates this term into two components.
 
-$$
-\mathrm{HAKE}
-=
+HAKE: Horizontal Advection of Kinetic Energy
+
 -q^2
 \left(
 u\frac{\partial K}{\partial x}
 +
 v\frac{\partial K}{\partial y}
-\right)
+\right).
 $$
 
-and
+HAV: Horizontal Advection of Water Vapor
 
-$$
-\mathrm{HAV}
-=
 -2qK
 \left(
 u\frac{\partial q}{\partial x}
@@ -126,111 +126,105 @@ v\frac{\partial q}{\partial y}
 \right).
 $$
 
-Therefore,
+Therefore, the complete horizontal VKE-advection term is
 
-$$
-\boxed{
-\mathrm{Horizontal\ VKE\ Advection}
-=
 \mathrm{HAKE}+\mathrm{HAV}
 }
 $$
 
-and for the vertically integrated budget,
+For the vertically integrated budget,
 
-$$
-\boxed{
-\mathrm{Horizontal\ IVKE\ Advection}
-=
-\mathrm{IHAKE}+\mathrm{IHAV}.
+\mathrm{IHAKE}+\mathrm{IHAV}
 }
 $$
 
----
+Thus,
 
-## 2. Vertical Advection of VKE
+Eq. (3), first RHS term:
 
-The **second term on the RHS of Eq. (3) of Lubis et al. (2026)** is
+Pressure level:
+    HAKE + HAV
+
+Vertically integrated:
+    IHAKE + IHAV
+4. Second RHS Term: Vertical Advection of VKE
+
+The second term on the RHS of Eq. (3) of Lubis et al. (2026) is
 
 $$
 -\omega
 \frac{\partial(q^2K)}{\partial p}.
 $$
 
-Applying the product rule,
+Using the product rule,
 
-$$
--\omega
-\frac{\partial(q^2K)}{\partial p}
-=
 -q^2\omega\frac{\partial K}{\partial p}
--
+
 2qK\omega\frac{\partial q}{\partial p}.
 $$
 
-The code separates this into
+Because
 
 $$
-\mathrm{VAKE}
-=
+K=\frac{1}{2}(u^2+v^2),
+$$
+
+we have
+
+u\frac{\partial u}{\partial p}
++
+v\frac{\partial v}{\partial p}.
+$$
+
+The code therefore separates the vertical VKE-advection term into the following two components.
+
+VAKE: Vertical Advection of Kinetic Energy
+
 -q^2\omega
 \left(
 u\frac{\partial u}{\partial p}
 +
 v\frac{\partial v}{\partial p}
-\right)
+\right).
 $$
 
-and
+VAV: Vertical Advection of Water Vapor
 
-$$
-\mathrm{VAV}
-=
 -2qK\omega
 \frac{\partial q}{\partial p}.
 $$
 
 Therefore,
 
-$$
-\boxed{
-\mathrm{Vertical\ VKE\ Advection}
-=
 \mathrm{VAKE}+\mathrm{VAV}
 }
 $$
 
-and for IVKE,
+For the vertically integrated budget,
 
-$$
-\boxed{
-\mathrm{Vertical\ IVKE\ Advection}
-=
-\mathrm{IVAKE}+\mathrm{IVAV}.
+\mathrm{IVAKE}+\mathrm{IVAV}
 }
 $$
 
----
+Thus,
 
-## 3. Potential Energy to Kinetic Energy Conversion
+Eq. (3), second RHS term:
 
-The **third term on the RHS of Eq. (3) of Lubis et al. (2026)** is
+Pressure level:
+    VAKE + VAV
+
+Vertically integrated:
+    IVAKE + IVAV
+5. Third RHS Term: Potential Energy to Kinetic Energy Conversion
+
+The third term on the RHS of Eq. (3) of Lubis et al. (2026) is
 
 $$
 -q^2\mathbf{V}\cdot\nabla_p\Phi.
 $$
 
-This term is directly output by the code as
+The code calculates this term directly as PEKE:
 
-$$
-\boxed{\mathrm{PEKE}}
-$$
-
-where
-
-$$
-\mathrm{PEKE}
-=
 -q^2
 \left(
 u\frac{\partial\Phi}{\partial x}
@@ -239,16 +233,33 @@ v\frac{\partial\Phi}{\partial y}
 \right).
 $$
 
-The vertically integrated counterpart is
+Therefore,
 
+\mathrm{PEKE}
+}
 $$
-\boxed{\mathrm{IPEKE}}.
+
+For the vertically integrated budget,
+
+\mathrm{IPEKE}
+}
 $$
 
-This term represents the **potential-energy-to-kinetic-energy conversion contribution to VKE**.
+This term represents the contribution associated with potential-energy-to-kinetic-energy conversion, weighted by $q^2$.
 
----
+Thus,
 
+Eq. (3), third RHS term:
+
+Pressure level:
+    PEKE
+
+Vertically integrated:
+    IPEKE
+
+
+
+    
 # Mapping to Eq. (3) of Lubis et al. (2026)
 
 For the pressure-level VKE budget:
