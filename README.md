@@ -9,7 +9,7 @@ This repository provides Python code for calculating Vapor Kinetic Energy (VKE),
 
 The budget formulation implemented in this code follows **Eq. (3) of Lubis et al. (2026)** and is based on the Vapor Kinetic Energy framework introduced by **Ong and Yang (2024)**.
 
-### Primary application
+### Application
 
 **Lubis, S. W., L. R. Leung, and M. Battalio (2026).**
 *More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*
@@ -19,7 +19,7 @@ The VKE/IVKE budget used in that study is given in **Eq. (3) of Lubis et al. (20
 
 ### Original VKE framework
 
-**Ong, H., & Yang, D. (2024).**
+**Eq. (3) of Ong, H., & Yang, D. (2024).**
 *Vapor kinetic energy for the detection and understanding of atmospheric rivers.*
 **Nature Communications, 15**, 9428.
 https://doi.org/10.1038/s41467-024-53369-0
