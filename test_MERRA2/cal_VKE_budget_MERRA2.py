@@ -78,10 +78,10 @@ P_EXTRA = P_EXTRA_HPA * 100.0
 DT_SECONDS = 10800.0  # 3 hours
 
 # Change these templates for your local MERRA-2 archive.
-QDT_TEMPLATE = "MERRA2_400.tavg3_3d_qdt_Np.{date}.nc4"
-UDT_TEMPLATE = "MERRA2_400.tavg3_3d_udt_Np.{date}.nc4"
-ASM_TEMPLATE = "MERRA2_400.inst3_3d_asm_Np.{date}.nc4"
-ASMA_TEMPLATE = "MERRA2_400.tavg3_3d_asm_Nv.{date}.nc4"
+QDT_TEMPLATE = "MERRA2_400.tavg3_3d_qdt_Np.{date}.nc"
+UDT_TEMPLATE = "MERRA2_400.tavg3_3d_udt_Np.{date}.nc"
+ASM_TEMPLATE = "MERRA2_400.inst3_3d_asm_Np.{date}.nc"
+ASMA_TEMPLATE = "MERRA2_400.tavg3_3d_asm_Nv.{date}.nc"
 
 OUTPUT_DIR = "."
 
