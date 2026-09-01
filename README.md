@@ -2,7 +2,7 @@
 
 **Sandro W. Lubis** Pacific Northwest National Laboratory (PNNL)  
 
-Python code for calculating **Vapor Kinetic Energy (VKE)**, **Integrated Vapor Kinetic Energy (IVKE)**, **Integrated Vapor Transport (IVT)**, and selected VKE/IVKE tendency terms from pressure-level atmospheric data.
+Python code for calculating Vapor Kinetic Energy (VKE), Integrated Vapor Kinetic Energy (IVKE), Integrated Vapor Transport (IVT), and selected VKE/IVKE tendency terms from pressure-level atmospheric data.
 
 The implementation follows **Eq. (3) of Lubis et al. (2026)** and is based on the VKE framework of **Ong and Yang (2024)** (see Eqs. 3 and 10).
 
