@@ -12,7 +12,7 @@
 #   Richland, Washington, USA
 #
 # Usage:
-#   python ARanalysisMERRA2.py 20190101 \
+#   python cal_VKE_budget_MERRA2.py 20190101 \
 #       --input-dir /path/to/MERRA2 \
 #       --output-dir ./output
 #
