@@ -1,6 +1,6 @@
 # Vapor Kinetic Energy (VKE) Budget
 
-**Sandro W. Lubis** Pacific Northwest National Laboratory (PNNL)  
+**Sandro W. Lubis** Pacific Northwest National Laboratory (PNNL) (slubis.geomar@gmail.com)
 
 Python code for calculating Vapor Kinetic Energy (VKE), Integrated Vapor Kinetic Energy (IVKE), Integrated Vapor Transport (IVT), and selected VKE/IVKE tendency terms from pressure-level atmospheric data.
 
