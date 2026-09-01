@@ -1,150 +1,183 @@
 # Vapor Kinetic Energy (VKE) and Integrated Vapor Kinetic Energy (IVKE) Budget
 
-This repository provides Python code for calculating **Vapor Kinetic Energy (VKE)**, **Integrated Vapor Kinetic Energy (IVKE)**, **Integrated Vapor Transport (IVT)**, and individual VKE/IVKE tendency terms from pressure-level atmospheric data.
+This repository provides Python code for calculating **Vapor Kinetic Energy (VKE)**, **Integrated Vapor Kinetic Energy (IVKE)**, **Integrated Vapor Transport (IVT)**, and selected VKE/IVKE tendency terms from pressure-level atmospheric data.
 
-The VKE budget implemented in this code follows **Eq. (3) of Lubis et al. (2026)** and is based on the VKE framework introduced by **Ong and Yang (2024)**.
+The VKE/IVKE budget implemented in this code follows **Eq. (3) of Lubis et al. (2026)** and is based on the Vapor Kinetic Energy framework introduced by **Ong and Yang (2024)**.
+
+The code explicitly calculates the dynamical terms associated with:
+
+- horizontal advection of VKE,
+- vertical advection of VKE,
+- potential energy (PE) conversion to kinetic energy (KE).
+
+The remaining physical tendency terms can be diagnosed as a **residual**, or calculated explicitly if the corresponding model/reanalysis tendency variables are available, following **Eq. (10) of Ong and Yang (2024)**.
 
 ---
 
 ## References
 
-### Application of the VKE/IVKE budget
+### Lubis et al. (2026)
 
-**Lubis, S. W., L. R. Leung, and M. Battalio (2026).**
-*More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*
+**Lubis, S. W., L. R. Leung, and M. Battalio (2026).**  
+*More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*  
 **Geophysical Research Letters.**
 
-The VKE/IVKE budget implemented in this repository corresponds to **Eq. (3) of Lubis et al. (2026)**.
+The VKE/IVKE budget used in this repository corresponds to **Eq. (3) of Lubis et al. (2026)**.
 
-### Original VKE framework
+### Ong and Yang (2024)
 
-**Ong, H., and D. Yang (2024).**
-*Vapor kinetic energy for the detection and understanding of atmospheric rivers.*
-**Nature Communications, 15**, 9428.
-doi:10.1038/s41467-024-53369-0
+**Ong, H., and D. Yang (2024).**  
+*Vapor kinetic energy for the detection and understanding of atmospheric rivers.*  
+**Nature Communications, 15**, 9428.  
+https://doi.org/10.1038/s41467-024-53369-0
 
-The complete VKE tendency decomposition, including additional parameterized physical processes, is given in **Eq. (10) of Ong and Yang (2024)**.
+The original VKE framework and its complete physical tendency decomposition are described in **Eqs. (3), (8), and (10) of Ong and Yang (2024)**.
 
 ---
 
-# 1. Definition of VKE
+# 1. Definition of Vapor Kinetic Energy
 
-Following Ong and Yang (2024), the horizontal wind vector is
+Following Ong and Yang (2024), the horizontal velocity vector is
 
-$$
-\mathbf{u}=(u,v),
-$$
+```math
+\mathbf{u}=(u,v)
+```
 
 and the horizontal kinetic energy per unit mass is
 
-$$
-K=\frac{1}{2}|\mathbf{u}|^2
-=\frac{1}{2}(u^2+v^2).
-$$
+```math
+K
+=
+\frac{1}{2}
+\left(
+u^2+v^2
+\right)
+=
+\frac{1}{2}|\mathbf{u}|^2
+```
+
+where
+
+- `u` is zonal velocity,
+- `v` is meridional velocity.
 
 Vapor kinetic energy is defined as
 
-$$
-\mathrm{VKE}=q^2K,
-$$
+```math
+\mathrm{VKE}
+=
+q^2K
+```
 
-where $q$ is specific humidity.
+where `q` is specific humidity.
 
-The vertically integrated vapor kinetic energy is
+Following Ong and Yang (2024), vertically integrated vapor kinetic energy is
 
-$$
+```math
 \mathrm{IVKE}
 \equiv
 -\frac{1}{g}
 \int_{p_B}^{p_T}
-q^2K\,dp,
-$$
+q^2K\,dp
+```
 
 where
 
-* $p_B$ is the lower pressure boundary,
-* $p_T$ is the upper pressure boundary,
-* $g$ is gravitational acceleration.
+- `g` is gravitational acceleration,
+- `p_B` is the lower pressure boundary,
+- `p_T` is the upper pressure boundary.
 
-Because $p_B>p_T$, this is equivalent to
+Because `p_B > p_T`, the equivalent form used computationally is
 
-$$
+```math
 \mathrm{IVKE}
 =
 \frac{1}{g}
 \int_{p_T}^{p_B}
-q^2K\,dp.
-$$
+q^2K\,dp
+```
 
-The default integration range used in this code is **1000–200 hPa**.
+The default integration range in this code is **1000–200 hPa**.
 
 ---
 
 # 2. VKE Tendency Equation
 
-Following the notation of Ong and Yang (2024), the simplified VKE tendency equation can be written as
+Following the notation of Ong and Yang (2024), the simplified VKE prognostic equation is
 
-$$
+```math
 \frac{\partial q^2K}{\partial t}
 =
--\mathbf{u}\cdot\nabla_p(q^2K)
+-\mathbf{u}\cdot\boldsymbol{\nabla}_p(q^2K)
 -\omega\frac{\partial q^2K}{\partial p}
--q^2\mathbf{u}\cdot\nabla_p\Phi
+-q^2\mathbf{u}\cdot\boldsymbol{\nabla}_p\Phi
 +q^2\mathbf{u}\cdot\mathbf{F}_T
 +2KqS_M
-+\mathrm{Other}.
-$$
++\mathrm{Other}
+```
 
-Here,
+where
 
-* $\mathbf{u}$ is the horizontal wind vector,
-* $\nabla_p$ is the horizontal gradient operator on a constant-pressure surface,
-* $\omega=Dp/Dt$ is pressure vertical velocity,
-* $\Phi$ is geopotential,
-* $\mathbf{F}_T$ represents the turbulent/frictional momentum tendency,
-* $S_M$ represents the apparent moisture source or sink associated with moist processes.
+- `q` is specific humidity,
+- `K` is horizontal kinetic energy,
+- `u` is the horizontal velocity vector,
+- `∇p` is the horizontal gradient operator on a constant-pressure surface,
+- `ω = Dp/Dt` is pressure vertical velocity,
+- `Φ` is geopotential,
+- `F_T` is the turbulent momentum tendency,
+- `S_M` is the apparent moisture source/sink associated with moist physics.
 
-The present code explicitly calculates the first three dynamical terms on the right-hand side:
+The present code explicitly calculates the **first three terms on the RHS**.
 
-1. horizontal advection of VKE,
-2. vertical advection of VKE,
-3. potential-energy-to-kinetic-energy conversion.
+The most important correspondence is:
+
+```text
+Eq. (3), 1st RHS term = HAKE + HAV
+Eq. (3), 2nd RHS term = VAKE + VAV
+Eq. (3), 3rd RHS term = PEKE
+```
+
+For the vertically integrated IVKE budget:
+
+```text
+Eq. (3), 1st RHS term = IHAKE + IHAV
+Eq. (3), 2nd RHS term = IVAKE + IVAV
+Eq. (3), 3rd RHS term = IPEKE
+```
 
 ---
 
-# 3. Horizontal Advection of VKE
+# 3. First RHS Term: Horizontal Advection of VKE
 
-The first term on the RHS of **Eq. (3) of Lubis et al. (2026)** is
+The first RHS term in Eq. (3) is
 
-$$
--\mathbf{u}\cdot\nabla_p(q^2K).
-$$
+```math
+-\mathbf{u}\cdot\boldsymbol{\nabla}_p(q^2K)
+```
 
-Applying the product rule,
+Using the product rule,
 
-$$
--\mathbf{u}\cdot\nabla_p(q^2K)
+```math
+-\mathbf{u}\cdot\boldsymbol{\nabla}_p(q^2K)
 =
--q^2\mathbf{u}\cdot\nabla_pK
+-q^2\mathbf{u}\cdot\boldsymbol{\nabla}_pK
 -
-2Kq\,\mathbf{u}\cdot\nabla_pq.
-$$
+2Kq\mathbf{u}\cdot\boldsymbol{\nabla}_pq
+```
 
-The code calculates these two components separately.
+Following the terminology of Ong and Yang (2024), these two components are **HAKE** and **HAV**.
 
-## HAKE
+## 3.1 HAKE: Horizontal Advection of Kinetic Energy
 
-The kinetic-energy component is
-
-$$
+```math
 \mathrm{HAKE}
 =
--q^2\mathbf{u}\cdot\nabla_pK.
-$$
+-q^2\mathbf{u}\cdot\boldsymbol{\nabla}_pK
+```
 
 In component form,
 
-$$
+```math
 \mathrm{HAKE}
 =
 -q^2
@@ -152,22 +185,20 @@ $$
 u\frac{\partial K}{\partial x}
 +
 v\frac{\partial K}{\partial y}
-\right).
-$$
+\right)
+```
 
-## HAV
+## 3.2 HAV: Horizontal Advection of Vapor
 
-The water-vapor component is
-
-$$
+```math
 \mathrm{HAV}
 =
--2Kq\,\mathbf{u}\cdot\nabla_pq.
-$$
+-2Kq\mathbf{u}\cdot\boldsymbol{\nabla}_pq
+```
 
 In component form,
 
-$$
+```math
 \mathrm{HAV}
 =
 -2Kq
@@ -175,92 +206,85 @@ $$
 u\frac{\partial q}{\partial x}
 +
 v\frac{\partial q}{\partial y}
-\right).
-$$
+\right)
+```
 
 Therefore,
 
-$$
--\mathbf{u}\cdot\nabla_p(q^2K)
+```math
+-\mathbf{u}\cdot\boldsymbol{\nabla}_p(q^2K)
 =
-\mathrm{HAKE}+\mathrm{HAV}.
-$$
-
-Thus, the **first RHS term of Eq. (3)** is
-
-```text
-Pressure level:
-    HAKE + HAV
-
-Vertically integrated:
-    IHAKE + IHAV
+\mathrm{HAKE}
++
+\mathrm{HAV}
 ```
 
-For IVKE,
+Thus:
 
-$$
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\left[
--\mathbf{u}\cdot\nabla_p(q^2K)
-\right]dp
-=
-\mathrm{IHAKE}+\mathrm{IHAV}.
-$$
+```text
+Horizontal VKE advection = HAKE + HAV
+```
+
+and after vertical integration,
+
+```text
+Horizontal IVKE advection = IHAKE + IHAV
+```
 
 ---
 
-# 4. Vertical Advection of VKE
+# 4. Second RHS Term: Vertical Advection of VKE
 
-The second term on the RHS of **Eq. (3) of Lubis et al. (2026)** is
+The second RHS term in Eq. (3) is
 
-$$
+```math
 -\omega
-\frac{\partial q^2K}{\partial p}.
-$$
+\frac{\partial q^2K}{\partial p}
+```
 
-Applying the product rule,
+Using the product rule,
 
-$$
+```math
 -\omega
 \frac{\partial q^2K}{\partial p}
 =
 -q^2\omega\frac{\partial K}{\partial p}
 -
-2Kq\omega\frac{\partial q}{\partial p}.
-$$
+2Kq\omega\frac{\partial q}{\partial p}
+```
 
-The code again calculates the two contributions separately.
+These two components correspond to **VAKE** and **VAV**.
 
-## VAKE
+## 4.1 VAKE: Vertical Advection of Kinetic Energy
 
-The kinetic-energy component is
-
-$$
+```math
 \mathrm{VAKE}
 =
--q^2\omega\frac{\partial K}{\partial p}.
-$$
+-q^2\omega
+\frac{\partial K}{\partial p}
+```
 
 Since
 
-$$
-K=\frac{1}{2}(u^2+v^2),
-$$
+```math
+K
+=
+\frac{1}{2}(u^2+v^2)
+```
 
 then
 
-$$
+```math
 \frac{\partial K}{\partial p}
 =
 u\frac{\partial u}{\partial p}
 +
-v\frac{\partial v}{\partial p}.
-$$
+v\frac{\partial v}{\partial p}
+```
 
-Therefore,
+and therefore
 
-$$
+```math
 \mathrm{VAKE}
 =
 -q^2\omega
@@ -268,73 +292,68 @@ $$
 u\frac{\partial u}{\partial p}
 +
 v\frac{\partial v}{\partial p}
-\right).
-$$
+\right)
+```
 
-## VAV
+## 4.2 VAV: Vertical Advection of Vapor
 
-The water-vapor component is
-
-$$
+```math
 \mathrm{VAV}
 =
 -2Kq\omega
-\frac{\partial q}{\partial p}.
-$$
+\frac{\partial q}{\partial p}
+```
 
 Therefore,
 
-$$
+```math
 -\omega
 \frac{\partial q^2K}{\partial p}
 =
-\mathrm{VAKE}+\mathrm{VAV}.
-$$
-
-Thus, the **second RHS term of Eq. (3)** is
-
-```text
-Pressure level:
-    VAKE + VAV
-
-Vertically integrated:
-    IVAKE + IVAV
+\mathrm{VAKE}
++
+\mathrm{VAV}
 ```
 
-For IVKE,
+Thus:
 
-$$
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\left[
--\omega
-\frac{\partial q^2K}{\partial p}
-\right]dp
-=
-\mathrm{IVAKE}+\mathrm{IVAV}.
-$$
+```text
+Vertical VKE advection = VAKE + VAV
+```
+
+and after vertical integration,
+
+```text
+Vertical IVKE advection = IVAKE + IVAV
+```
 
 ---
 
-# 5. Potential Energy to Kinetic Energy Conversion
+# 5. Third RHS Term: Potential Energy Conversion to Kinetic Energy
 
-The third term on the RHS of **Eq. (3) of Lubis et al. (2026)** is
+The third RHS term in Eq. (3) is
 
-$$
--q^2\mathbf{u}\cdot\nabla_p\Phi.
-$$
+```math
+-q^2
+\mathbf{u}\cdot
+\boldsymbol{\nabla}_p\Phi
+```
 
-The code calculates this term as
+Following Ong and Yang (2024), this is the **potential energy conversion to kinetic energy** term.
 
-$$
+The code outputs this term as **PEKE**:
+
+```math
 \mathrm{PEKE}
 =
--q^2\mathbf{u}\cdot\nabla_p\Phi.
-$$
+-q^2
+\mathbf{u}\cdot
+\boldsymbol{\nabla}_p\Phi
+```
 
 In component form,
 
-$$
+```math
 \mathrm{PEKE}
 =
 -q^2
@@ -342,322 +361,441 @@ $$
 u\frac{\partial\Phi}{\partial x}
 +
 v\frac{\partial\Phi}{\partial y}
-\right).
-$$
-
-This represents the contribution from **potential-energy-to-kinetic-energy conversion** to the VKE tendency.
-
-Thus, the **third RHS term of Eq. (3)** is
-
-```text
-Pressure level:
-    PEKE
-
-Vertically integrated:
-    IPEKE
+\right)
 ```
 
-For IVKE,
+Therefore:
 
-$$
-\mathrm{IPEKE}
-=
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\left(
--q^2\mathbf{u}\cdot\nabla_p\Phi
-\right)dp.
-$$
+```text
+PE → KE conversion = PEKE
+```
+
+and after vertical integration:
+
+```text
+PE → KE conversion = IPEKE
+```
 
 ---
 
-# 6. Mapping of Eq. (3) to the Code Output
+# 6. Mapping of Eq. (3) to Code Variables
 
-The relationship between the terms in Eq. (3) and the variables produced by the code is
+The relationship between **Eq. (3) of Lubis et al. (2026)** and the variables produced by this code is summarized below.
 
-| Physical process         | VKE equation                        | Pressure-level output | Integrated output |
-| ------------------------ | ----------------------------------- | --------------------- | ----------------- |
-| Horizontal VKE advection | $-\mathbf{u}\cdot\nabla_p(q^2K)$    | `HAKE + HAV`          | `IHAKE + IHAV`    |
-| Vertical VKE advection   | $-\omega,\partial(q^2K)/\partial p$ | `VAKE + VAV`          | `IVAKE + IVAV`    |
-| PE-to-KE conversion      | $-q^2\mathbf{u}\cdot\nabla_p\Phi$   | `PEKE`                | `IPEKE`           |
+| Eq. (3) process | Pressure-level output | Vertically integrated output |
+|---|---|---|
+| Horizontal advection of VKE | `HAKE + HAV` | `IHAKE + IHAV` |
+| Vertical advection of VKE | `VAKE + VAV` | `IVAKE + IVAV` |
+| PE conversion to KE | `PEKE` | `IPEKE` |
+| Turbulent/frictional KE tendency | Not currently calculated | Not currently calculated |
+| Moist-physics/condensation tendency | Not currently calculated | Not currently calculated |
+| Other physical processes | Not currently calculated | Not currently calculated |
 
-Therefore,
-
-```text
-Eq. (3), first RHS term  = HAKE + HAV
-Eq. (3), second RHS term = VAKE + VAV
-Eq. (3), third RHS term  = PEKE
-```
-
-and for the vertically integrated budget,
+In compact form:
 
 ```text
-Eq. (3), first RHS term  = IHAKE + IHAV
-Eq. (3), second RHS term = IVAKE + IVAV
-Eq. (3), third RHS term  = IPEKE
+1st RHS term = HAKE + HAV
+2nd RHS term = VAKE + VAV
+3rd RHS term = PEKE
 ```
 
-The sum of the resolved dynamical VKE tendency terms calculated by this code is
+For IVKE:
 
-$$
+```text
+1st RHS term = IHAKE + IHAV
+2nd RHS term = IVAKE + IVAV
+3rd RHS term = IPEKE
+```
+
+The sum of the dynamical VKE tendency terms calculated by this code is
+
+```math
 \mathrm{VKE}_{\mathrm{dyn}}
 =
 \mathrm{HAKE}
-+\mathrm{HAV}
-+\mathrm{VAKE}
-+\mathrm{VAV}
-+\mathrm{PEKE}.
-$$
++
+\mathrm{HAV}
++
+\mathrm{VAKE}
++
+\mathrm{VAV}
++
+\mathrm{PEKE}
+```
 
 For IVKE,
 
-$$
+```math
 \mathrm{IVKE}_{\mathrm{dyn}}
 =
 \mathrm{IHAKE}
-+\mathrm{IHAV}
-+\mathrm{IVAKE}
-+\mathrm{IVAV}
-+\mathrm{IPEKE}.
-$$
++
+\mathrm{IHAV}
++
+\mathrm{IVAKE}
++
+\mathrm{IVAV}
++
+\mathrm{IPEKE}
+```
 
 ---
 
-# 7. Other Terms and Residual
+# 7. Complete VKE Decomposition
 
-The full VKE budget contains additional physical processes that are not explicitly calculated by the present version of the code.
+The present code calculates only the resolved dynamical components required for the application in Lubis et al. (2026).
 
-In the notation of Ong and Yang (2024), these include terms such as
+For reference, the complete VKE prognostic equation derived by Ong and Yang (2024) can be written as
 
-$$
-q^2\mathbf{u}\cdot\mathbf{F}_T
-$$
+```math
+\frac{\partial q^2K}{\partial t}
+=
+-q^2\mathbf{u}\cdot\boldsymbol{\nabla}_pK
+-q^2\omega\frac{\partial K}{\partial p}
+-q^2\mathbf{u}\cdot\boldsymbol{\nabla}_p\Phi
++q^2\mathbf{u}\cdot\mathbf{F}_M
++q^2\mathbf{u}\cdot\mathbf{F}_T
++q^2\mathbf{u}\cdot\mathbf{F}_G
+-2Kq\mathbf{u}\cdot\boldsymbol{\nabla}_pq
+-2Kq\omega\frac{\partial q}{\partial p}
++2KqS_M
++2KqS_T
++2KqS_C
+```
 
-associated with turbulent/frictional momentum tendencies, and
+where the additional momentum tendencies are
 
-$$
+- `F_M`: apparent momentum tendency from subgrid-scale moist convection,
+- `F_T`: turbulent momentum tendency,
+- `F_G`: gravity-wave-drag momentum tendency,
+
+and the moisture tendencies are
+
+- `S_M`: apparent moisture source/sink from moist physics,
+- `S_T`: turbulent moisture tendency,
+- `S_C`: chemistry-related moisture tendency.
+
+---
+
+# 8. Complete IVKE Terms Following Eq. (10) of Ong and Yang (2024)
+
+Ong and Yang (2024) define the pressure integration operator as
+
+```math
+\left\langle \; \right\rangle
+\equiv
+-\frac{1}{g}
+\int_{p_B}^{p_T}
+(\;)\,dp
+```
+
+Using this notation, their complete IVKE budget contains the following terms.
+
+## HAKE
+
+Horizontal advection of kinetic energy:
+
+```math
+\mathrm{HAKE}
+=
+\left\langle
+-q^2
+\mathbf{u}\cdot
+\boldsymbol{\nabla}_pK
+\right\rangle
+```
+
+## VAKE
+
+Vertical advection of kinetic energy:
+
+```math
+\mathrm{VAKE}
+=
+\left\langle
+-q^2\omega
+\frac{\partial K}{\partial p}
+\right\rangle
+```
+
+## PEKE
+
+Potential energy conversion to kinetic energy:
+
+```math
+\mathrm{PEKE}
+=
+\left\langle
+-q^2
+\mathbf{u}\cdot
+\boldsymbol{\nabla}_p\Phi
+\right\rangle
+```
+
+## MOKE
+
+Moist-convection tendency of kinetic energy:
+
+```math
+\mathrm{MOKE}
+=
+\left\langle
+q^2
+\mathbf{u}\cdot
+\mathbf{F}_M
+\right\rangle
+```
+
+## TOKE
+
+Turbulent tendency/dissipation of kinetic energy:
+
+```math
+\mathrm{TOKE}
+=
+\left\langle
+q^2
+\mathbf{u}\cdot
+\mathbf{F}_T
+\right\rangle
+```
+
+## GOKE
+
+Gravity-wave-drag tendency of kinetic energy:
+
+```math
+\mathrm{GOKE}
+=
+\left\langle
+q^2
+\mathbf{u}\cdot
+\mathbf{F}_G
+\right\rangle
+```
+
+## HAV
+
+Horizontal advection of vapor:
+
+```math
+\mathrm{HAV}
+=
+\left\langle
+-2Kq
+\mathbf{u}\cdot
+\boldsymbol{\nabla}_pq
+\right\rangle
+```
+
+## VAV
+
+Vertical advection of vapor:
+
+```math
+\mathrm{VAV}
+=
+\left\langle
+-2Kq\omega
+\frac{\partial q}{\partial p}
+\right\rangle
+```
+
+## COV
+
+Condensation/moist-physics tendency of vapor:
+
+```math
+\mathrm{COV}
+=
+\left\langle
 2KqS_M
-$$
+\right\rangle
+```
 
-associated with moist-physics sources and sinks of water vapor.
+## TOV
 
-The more complete formulation in **Eq. (10) of Ong and Yang (2024)** further separates momentum and moisture tendency contributions associated with parameterized physical processes.
+Turbulent tendency of vapor:
 
-For example, the momentum tendencies can be represented schematically by
+```math
+\mathrm{TOV}
+=
+\left\langle
+2KqS_T
+\right\rangle
+```
 
-$$
-\mathbf{F}_M,\qquad
-\mathbf{F}_T,\qquad
-\mathbf{F}_G,
-$$
+## CMOV
 
-where the subscripts denote tendencies associated with processes such as moist convection, turbulence, and gravity-wave drag.
+Chemistry tendency of vapor:
 
-Likewise, moisture sources and sinks can be represented by
+```math
+\mathrm{CMOV}
+=
+\left\langle
+2KqS_C
+\right\rangle
+```
 
-$$
-S_M,\qquad
-S_T,\qquad
-S_C,
-$$
+## SPTE
 
-for moist-physics, turbulence, and other moisture tendencies.
+Surface-pressure tendency effect:
 
-If these model or reanalysis tendency variables are available, their VKE contributions can be calculated explicitly following **Eq. (10) of Ong and Yang (2024)**.
+```math
+\mathrm{SPTE}
+=
+\left[
+\frac{q^2K}{g}
+\right]_{p_B}
+\frac{\partial p_B}{\partial t}
+```
 
-Otherwise, the uncalculated terms may be estimated as a residual.
+These additional terms are **not currently calculated by this code**.
 
-If the total VKE tendency is available,
+However, if the corresponding model or reanalysis tendency variables are available, they can be calculated explicitly following **Eq. (10) of Ong and Yang (2024)**.
 
-$$
-\frac{\partial q^2K}{\partial t},
-$$
+---
 
-then
+# 9. Residual Terms
 
-$$
+If the total VKE tendency is available, all physical processes not explicitly calculated by the present code can be grouped into a residual.
+
+For pressure-level VKE:
+
+```math
 R_{\mathrm{VKE}}
 =
 \frac{\partial q^2K}{\partial t}
 -
-\left[
+\left(
 \mathrm{HAKE}
-+\mathrm{HAV}
-+\mathrm{VAKE}
-+\mathrm{VAV}
-+\mathrm{PEKE}
-\right].
-$$
++
+\mathrm{HAV}
++
+\mathrm{VAKE}
++
+\mathrm{VAV}
++
+\mathrm{PEKE}
+\right)
+```
 
-Similarly,
+For vertically integrated VKE:
 
-$$
+```math
 R_{\mathrm{IVKE}}
 =
 \frac{\partial\mathrm{IVKE}}{\partial t}
 -
-\left[
+\left(
 \mathrm{IHAKE}
-+\mathrm{IHAV}
-+\mathrm{IVAKE}
-+\mathrm{IVAV}
-+\mathrm{IPEKE}
-\right].
-$$
++
+\mathrm{IHAV}
++
+\mathrm{IVAKE}
++
+\mathrm{IVAV}
++
+\mathrm{IPEKE}
+\right)
+```
 
-The residual should not automatically be interpreted as one specific physical process. It may include contributions from
+The residual may contain contributions from:
 
-* friction,
-* turbulence,
-* moist convection,
-* condensation and evaporation,
-* gravity-wave drag,
-* other subgrid-scale processes,
-* surface-pressure tendency effects,
-* analysis increments in reanalysis products,
-* and numerical budget-closure errors.
+- moist-convective momentum tendencies,
+- turbulent/frictional momentum tendencies,
+- gravity-wave drag,
+- condensation and evaporation,
+- subgrid-scale moist physics,
+- turbulent moisture tendencies,
+- chemistry or other moisture tendencies,
+- surface-pressure tendency effects,
+- analysis increments in reanalysis products,
+- numerical discretization and budget-closure errors.
 
-Whenever the corresponding tendency variables are available, these processes should preferably be calculated explicitly rather than included in the residual.
+Therefore, the residual should **not be interpreted as a single physical process**.
+
+If variables for friction, turbulence, convection, gravity-wave drag, condensation, subgrid-scale processes, or other parameterized tendencies are available, these contributions can instead be calculated explicitly following **Eq. (10) of Ong and Yang (2024)**.
 
 ---
 
-# 8. Output Modes
+# 10. Required Input Variables
 
-The script provides three output options.
+The following variables are required by the current code.
 
-### Vertically integrated fields only
+| Variable | Description | Expected units |
+|---|---|---|
+| `q` | Specific humidity | kg kg⁻¹ |
+| `u` | Zonal wind | m s⁻¹ |
+| `v` | Meridional wind | m s⁻¹ |
+| `omega` | Pressure vertical velocity | Pa s⁻¹ |
+| `phi` | Geopotential | m² s⁻² |
+| `ps` | Surface pressure | Pa |
+
+The corresponding variable names in the input NetCDF files can be changed in the `VARIABLES` dictionary.
+
+For example:
 
 ```python
-OUTPUT_MODE = "2D"
-```
-
-### Pressure-level fields only
-
-```python
-OUTPUT_MODE = "3D"
-```
-
-### Both
-
-```python
-OUTPUT_MODE = "both"
+VARIABLES = {
+    "q":     "var133",
+    "u":     "var131",
+    "v":     "var132",
+    "omega": "var135",
+    "phi":   "var129",
+    "ps":    "var151",
+}
 ```
 
 ---
 
-# 9. Pressure-Level Output
+# 11. Geopotential
 
-Dimensions:
+The variable `phi` must represent **geopotential**, denoted by `Φ`, with units
 
 ```text
-time, plev, lat, lon
+m² s⁻²
 ```
 
-| Variable | Definition                         | Units  |
-| -------- | ---------------------------------- | ------ |
-| `VKE`    | $q^2K$                             | m² s⁻² |
-| `HAKE`   | $-q^2\mathbf{u}\cdot\nabla_pK$     | m² s⁻³ |
-| `HAV`    | $-2Kq,\mathbf{u}\cdot\nabla_pq$    | m² s⁻³ |
-| `VAKE`   | $-q^2\omega,\partial K/\partial p$ | m² s⁻³ |
-| `VAV`    | $-2Kq\omega,\partial q/\partial p$ | m² s⁻³ |
-| `PEKE`   | $-q^2\mathbf{u}\cdot\nabla_p\Phi$  | m² s⁻³ |
+If the available variable is geopotential height `Z` in meters, convert it first:
 
-The complete advection terms are therefore
-
-$$
-\mathrm{Horizontal\ VKE\ Advection}
-=
-\mathrm{HAKE}+\mathrm{HAV},
-$$
-
-and
-
-$$
-\mathrm{Vertical\ VKE\ Advection}
-=
-\mathrm{VAKE}+\mathrm{VAV}.
-$$
-
----
-
-# 10. Vertically Integrated Output
-
-Dimensions:
-
-```text
-time, lat, lon
+```math
+\Phi=gZ
 ```
 
-| Variable | Description                     | Units      |
-| -------- | ------------------------------- | ---------- |
-| `IVT`    | Integrated vapor transport      | kg m⁻¹ s⁻¹ |
-| `IVKE`   | Integrated vapor kinetic energy | kg s⁻²     |
-| `IHAKE`  | Integrated HAKE                 | kg s⁻³     |
-| `IHAV`   | Integrated HAV                  | kg s⁻³     |
-| `IVAKE`  | Integrated VAKE                 | kg s⁻³     |
-| `IVAV`   | Integrated VAV                  | kg s⁻³     |
-| `IPEKE`  | Integrated PEKE                 | kg s⁻³     |
+For example:
 
-Thus,
+```python
+phi = 9.81 * geopotential_height
+```
 
-$$
-\mathrm{Horizontal\ IVKE\ Advection}
-=
-\mathrm{IHAKE}+\mathrm{IHAV},
-$$
-
-$$
-\mathrm{Vertical\ IVKE\ Advection}
-=
-\mathrm{IVAKE}+\mathrm{IVAV},
-$$
-
-and
-
-$$
-\mathrm{PE\rightarrow KE\ Conversion}
-=
-\mathrm{IPEKE}.
-$$
-
----
-
-# 11. Required Input Variables
-
-| Variable | Description                                | Units   |
-| -------- | ------------------------------------------ | ------- |
-| `q`      | Specific humidity                          | kg kg⁻¹ |
-| `u`      | Zonal wind                                 | m s⁻¹   |
-| `v`      | Meridional wind                            | m s⁻¹   |
-| `omega`  | Pressure vertical velocity, $\omega=Dp/Dt$ | Pa s⁻¹  |
-| `phi`    | Geopotential, $\Phi$                       | m² s⁻²  |
-| `ps`     | Surface pressure                           | Pa      |
-
-The variable names in the input files can be changed through the `VARIABLES` dictionary in the script.
+Do **not** use geopotential height in meters directly in the PEKE calculation.
 
 ---
 
 # 12. Pressure Coordinate
 
-Pressure can be supplied in either **Pa** or **hPa**.
+Pressure may be supplied in either **Pa** or **hPa**.
 
-The script automatically converts hPa to Pa when necessary.
+The script automatically converts pressure to Pa when necessary.
 
-Pressure levels may be supplied in either ascending or descending order. For example, both
+Pressure levels may also be supplied in either ascending or descending order.
+
+For example, both
 
 ```text
-1000, 925, 850, ..., 300, 250, 200 hPa
+1000, 925, 850, 700, ..., 300, 250, 200 hPa
 ```
 
 and
 
 ```text
-200, 250, 300, ..., 850, 925, 1000 hPa
+200, 250, 300, ..., 700, 850, 925, 1000 hPa
 ```
 
 are acceptable.
 
-Internally, pressure is arranged from high pressure to low pressure:
+Internally, the code arranges pressure from **high pressure to low pressure**:
 
 ```text
 1000 → 925 → 850 → ... → 300 → 250 → 200 hPa
@@ -671,67 +809,47 @@ P_TOP    =  20000.0   #  200 hPa
 P_EXTRA  =  15000.0   #  150 hPa
 ```
 
-`P_EXTRA` is used only to improve vertical derivatives near the upper integration boundary and is not included in the final vertical integration.
+`P_EXTRA` is used only for calculating vertical derivatives near the upper boundary.
+
+It is **not** included in the final pressure-level output or the 1000–200 hPa vertical integration.
 
 ---
 
-# 13. Geopotential
+# 13. Integrated Vapor Transport
 
-The variable $\Phi$ must be **geopotential** with units
+The script also calculates Integrated Vapor Transport (IVT).
 
-```text
-m² s⁻²
-```
+Following pressure-coordinate notation, the zonal vapor transport is
 
-If the available input is geopotential height $Z$ in meters, convert it using
-
-$$
-\Phi=gZ.
-$$
-
-For example,
-
-```python
-phi = 9.81 * geopotential_height
-```
-
-Geopotential height in meters should not be used directly in the PE-to-KE conversion term.
-
----
-
-# 14. Integrated Vapor Transport
-
-The code also calculates IVT.
-
-Following pressure-coordinate notation, the vertically integrated zonal and meridional vapor transports are
-
-$$
+```math
 Q_u
 =
 -\frac{1}{g}
 \int_{p_B}^{p_T}
-qu\,dp,
-$$
+qu\,dp
+```
 
-and
+and the meridional vapor transport is
 
-$$
+```math
 Q_v
 =
 -\frac{1}{g}
 \int_{p_B}^{p_T}
-qv\,dp.
-$$
+qv\,dp
+```
 
-The IVT magnitude is
+The IVT magnitude is then
 
-$$
+```math
 \mathrm{IVT}
 =
-\sqrt{Q_u^2+Q_v^2}.
-$$
+\sqrt{
+Q_u^2+Q_v^2
+}
+```
 
-Its units are
+with units
 
 ```text
 kg m⁻¹ s⁻¹
@@ -739,140 +857,301 @@ kg m⁻¹ s⁻¹
 
 ---
 
-# 15. Vertical Integration
+# 14. Vertical Integration
 
-Following the pressure-coordinate convention of Ong and Yang (2024), the vertically integrated form of a pressure-level quantity $X$ is
+For any pressure-level quantity `X`, the vertically integrated quantity is calculated as
 
-$$
-IX
-\equiv
+```math
+\left\langle X \right\rangle
+=
 -\frac{1}{g}
 \int_{p_B}^{p_T}
-X\,dp.
-$$
+X\,dp
+```
 
-Equivalently,
+or equivalently,
 
-$$
-IX
+```math
+\left\langle X \right\rangle
 =
 \frac{1}{g}
 \int_{p_T}^{p_B}
-X\,dp.
-$$
+X\,dp
+```
 
 For example,
 
-$$
+```math
 \mathrm{IHAKE}
 =
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\mathrm{HAKE}\,dp,
-$$
+\frac{1}{g}
+\int_{p_T}^{p_B}
+\mathrm{HAKE}\,dp
+```
 
-$$
+```math
 \mathrm{IHAV}
 =
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\mathrm{HAV}\,dp,
-$$
+\frac{1}{g}
+\int_{p_T}^{p_B}
+\mathrm{HAV}\,dp
+```
 
-$$
+```math
 \mathrm{IVAKE}
 =
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\mathrm{VAKE}\,dp,
-$$
+\frac{1}{g}
+\int_{p_T}^{p_B}
+\mathrm{VAKE}\,dp
+```
 
-$$
+```math
 \mathrm{IVAV}
 =
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\mathrm{VAV}\,dp,
-$$
+\frac{1}{g}
+\int_{p_T}^{p_B}
+\mathrm{VAV}\,dp
+```
 
 and
 
-$$
+```math
 \mathrm{IPEKE}
 =
--\frac{1}{g}
-\int_{p_B}^{p_T}
-\mathrm{PEKE}\,dp.
-$$
+\frac{1}{g}
+\int_{p_T}^{p_B}
+\mathrm{PEKE}\,dp
+```
 
-Surface pressure is used to account for terrain and to exclude portions of pressure layers that lie below the local surface.
+Surface pressure is used to account for terrain and exclude portions of pressure layers that lie below the local surface.
 
 ---
 
-# 16. Quick Interpretation
+# 15. Output Modes
 
-The correspondence between **Eq. (3) of Lubis et al. (2026)** and the code output is
+The code supports three output modes.
 
-```text
-                 VKE tendency
-                      |
-       --------------------------------
-       |               |              |
-   Horizontal       Vertical        PE → KE
-   advection        advection      conversion
-       |               |              |
-  HAKE + HAV      VAKE + VAV         PEKE
+## Vertically Integrated Output Only
+
+```python
+OUTPUT_MODE = "2D"
 ```
 
-For the vertically integrated budget:
+This saves only vertically integrated quantities.
 
-```text
-                IVKE tendency
-                      |
-       --------------------------------
-       |               |              |
-   Horizontal       Vertical        PE → KE
-   advection        advection      conversion
-       |               |              |
- IHAKE + IHAV    IVAKE + IVAV        IPEKE
+## Pressure-Level Output Only
+
+```python
+OUTPUT_MODE = "3D"
 ```
 
-The key correspondence is therefore
+This saves only pressure-level quantities.
+
+## Both
+
+```python
+OUTPUT_MODE = "both"
+```
+
+This saves both pressure-level and vertically integrated quantities.
+
+---
+
+# 16. Pressure-Level Output Variables
+
+Dimensions:
 
 ```text
-Eq. (3), 1st RHS = IHAKE + IHAV
-Eq. (3), 2nd RHS = IVAKE + IVAV
-Eq. (3), 3rd RHS = IPEKE
+time, plev, lat, lon
+```
+
+| Variable | Description | Units |
+|---|---|---|
+| `VKE` | Vapor kinetic energy | m² s⁻² |
+| `HAKE` | Horizontal advection of KE contribution | m² s⁻³ |
+| `VAKE` | Vertical advection of KE contribution | m² s⁻³ |
+| `PEKE` | PE conversion to KE contribution | m² s⁻³ |
+| `HAV` | Horizontal advection of vapor contribution | m² s⁻³ |
+| `VAV` | Vertical advection of vapor contribution | m² s⁻³ |
+
+The terms corresponding to Eq. (3) are:
+
+```text
+Horizontal VKE advection = HAKE + HAV
+
+Vertical VKE advection   = VAKE + VAV
+
+PE → KE conversion       = PEKE
 ```
 
 ---
 
-# 17. Citation
+# 17. Vertically Integrated Output Variables
+
+Dimensions:
+
+```text
+time, lat, lon
+```
+
+| Variable | Description | Units |
+|---|---|---|
+| `IVT` | Integrated vapor transport | kg m⁻¹ s⁻¹ |
+| `IVKE` | Integrated vapor kinetic energy | kg s⁻² |
+| `IHAKE` | Integrated horizontal advection of KE | kg s⁻³ |
+| `IVAKE` | Integrated vertical advection of KE | kg s⁻³ |
+| `IPEKE` | Integrated PE-to-KE conversion | kg s⁻³ |
+| `IHAV` | Integrated horizontal advection of vapor | kg s⁻³ |
+| `IVAV` | Integrated vertical advection of vapor | kg s⁻³ |
+
+The terms corresponding to Eq. (3) are:
+
+```text
+Horizontal IVKE advection = IHAKE + IHAV
+
+Vertical IVKE advection   = IVAKE + IVAV
+
+PE → KE conversion        = IPEKE
+```
+
+---
+
+# 18. Quick Summary
+
+The relationship between the individual output variables and the VKE budget is:
+
+```text
+                         VKE tendency
+                              |
+         ---------------------------------------------
+         |                    |                      |
+     Horizontal            Vertical               PE → KE
+     advection             advection             conversion
+         |                    |                      |
+     HAKE + HAV           VAKE + VAV                PEKE
+```
+
+For vertically integrated VKE:
+
+```text
+                        IVKE tendency
+                              |
+         ---------------------------------------------
+         |                    |                      |
+     Horizontal            Vertical               PE → KE
+     advection             advection             conversion
+         |                    |                      |
+   IHAKE + IHAV         IVAKE + IVAV               IPEKE
+```
+
+Therefore, the key correspondence with **Eq. (3) of Lubis et al. (2026)** is:
+
+```text
+First RHS term  = IHAKE + IHAV
+Second RHS term = IVAKE + IVAV
+Third RHS term  = IPEKE
+```
+
+The remaining terms can be diagnosed as a residual or calculated explicitly, if the required physical tendency variables are available, following **Eq. (10) of Ong and Yang (2024)**.
+
+---
+
+# 19. Running the Code
+
+Modify the user settings near the beginning of the Python script.
+
+For example:
+
+```python
+START_YEAR = 1979
+END_YEAR   = 2025
+
+OUTPUT_MODE = "2D"
+
+P_BOTTOM = 100000.0
+P_TOP    =  20000.0
+P_EXTRA  =  15000.0
+```
+
+Set the input file locations:
+
+```python
+FILES = {
+    "q":     "/path/to/q.{year}.nc",
+    "u":     "/path/to/u.{year}.nc",
+    "v":     "/path/to/v.{year}.nc",
+    "omega": "/path/to/omega.{year}.nc",
+    "phi":   "/path/to/phi.{year}.nc",
+    "ps":    "/path/to/ps.{year}.nc",
+}
+```
+
+Then run:
+
+```bash
+python VKE_budget.py
+```
+
+Output files are written to the directory specified by
+
+```python
+OUTPUT_DIR = "./output"
+```
+
+with filenames following
+
+```text
+VKE.budget.{mode}.{year}.nc
+```
+
+---
+
+# 20. Notes
+
+1. The pressure coordinate can be in either Pa or hPa.
+
+2. Pressure levels can be ascending or descending; the script automatically rearranges them internally.
+
+3. `phi` must be geopotential in m² s⁻², not geopotential height in meters.
+
+4. Actual surface pressure should be used whenever possible for correct terrain masking.
+
+5. `P_EXTRA` is used only to improve the pressure derivative near the upper integration boundary.
+
+6. The currently calculated dynamical terms do **not** represent the complete VKE budget.
+
+7. If friction, turbulence, moist convection, gravity-wave drag, condensation, subgrid-scale tendencies, or other physical tendency variables are available, additional terms can be calculated explicitly following Eq. (10) of Ong and Yang (2024).
+
+8. Otherwise, the contribution of unresolved processes can be estimated from the residual of the total VKE or IVKE tendency.
+
+---
+
+# 21. Citation
 
 If you use or adapt this code, please cite both the application paper and the original VKE framework.
 
-### Lubis et al. (2026)
+## Lubis et al. (2026)
 
-**Lubis, S. W., L. R. Leung, and M. Battalio (2026).**
-*More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*
+**Lubis, S. W., L. R. Leung, and M. Battalio (2026).**  
+*More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*  
 **Geophysical Research Letters.**
 
-The VKE/IVKE budget used in this repository corresponds to **Eq. (3) of Lubis et al. (2026)**.
+The VKE/IVKE budget implemented in this repository corresponds to **Eq. (3) of Lubis et al. (2026)**.
 
-### Ong and Yang (2024)
+## Ong and Yang (2024)
 
-**Ong, H., and D. Yang (2024).**
-*Vapor kinetic energy for the detection and understanding of atmospheric rivers.*
-**Nature Communications, 15**, 9428.
-doi:10.1038/s41467-024-53369-0
+**Ong, H., and D. Yang (2024).**  
+*Vapor kinetic energy for the detection and understanding of atmospheric rivers.*  
+**Nature Communications, 15**, 9428.  
+https://doi.org/10.1038/s41467-024-53369-0
 
-The VKE framework and the complete physical tendency decomposition are described in that paper, particularly **Eqs. (3) and (10)**.
+The original VKE framework and the complete physical tendency decomposition are described in **Eqs. (3), (8), and (10)** of Ong and Yang (2024).
 
 ---
 
-# 18. Author
+# 22. Author
 
-**Sandro W. Lubis**
-Atmospheric Sciences and Global Change Division
-Pacific Northwest National Laboratory (PNNL)
+**Sandro W. Lubis**  
+Atmospheric Sciences and Global Change Division  
+Pacific Northwest National Laboratory (PNNL)  
 Richland, Washington, USA
