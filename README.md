@@ -5,7 +5,7 @@
 Python code for calculating Vapor Kinetic Energy (VKE), Integrated Vapor Kinetic Energy (IVKE), Integrated Vapor Transport (IVT), and selected VKE/IVKE tendency terms from pressure-level atmospheric data.
 
 The implementation follows **Eq. (3) of Lubis et al. (2026)** and is based on the VKE framework of **Ong and Yang (2024)** (see **Eqs. 3 and 10**).
-
+The attached code uses ERA5 as the input dataset, but it can be easily adapted for other reanalysis products or model output.
 
 ## Citation
 If you use or adapt this code, please cite:
@@ -23,7 +23,7 @@ https://doi.org/10.1038/s41467-024-53369-0
 
 The original VKE framework and additional physical-process decomposition are given in **Ong and Yang (2024)**, including Eq. (10).
 
-The attached code uses ERA5 as the input dataset, but it can be easily adapted for other reanalysis products or model output.
+
 
 ---
 
