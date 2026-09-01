@@ -1,4 +1,4 @@
-# Vapor Kinetic Energy (VKE) and Integrated VKE (IVKE) Budget
+# Vapor Kinetic Energy (VKE) Budget
 
 **Sandro W. Lubis** Pacific Northwest National Laboratory (PNNL)  
 
