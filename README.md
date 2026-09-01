@@ -19,7 +19,7 @@ The VKE/IVKE budget used in that study is given in **Eq. (3) of Lubis et al. (20
 
 ### Original VKE framework
 
-**Eq. (3)** of **Ong, H., & Yang, D. (2024).**
+Eq. (3) of **Ong, H., & Yang, D. (2024).**
 *Vapor kinetic energy for the detection and understanding of atmospheric rivers.*
 **Nature Communications, 15**, 9428.
 https://doi.org/10.1038/s41467-024-53369-0
