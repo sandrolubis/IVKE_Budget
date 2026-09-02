@@ -10,12 +10,11 @@ The attached code uses ERA5 as the input dataset, but it can be easily adapted f
 ## Citation
 If you use or adapt this code, please cite:
 
-The VKE/IVKE budget implemented here corresponds to **Eq. (3) of Lubis et al. (2026)**.
-
 **Lubis, S. W., L. R. Leung, and M. Battalio (2026).**  
 *More Frequent Atmospheric Rivers and Associated Precipitation Extremes Induced by the Baroclinic Annular Mode.*  
 **Geophysical Research Letters.**
 
+The VKE/IVKE budget implemented here corresponds to **Eq. (3) of Lubis et al. (2026)**.
 The original VKE framework and additional physical-process decomposition are given in **Ong and Yang (2024)**, including Eq. (10).
 
 **Ong, H., and D. Yang (2024).**  
